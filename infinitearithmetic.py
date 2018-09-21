@@ -20,13 +20,18 @@ class OperatorType(Enum):
     MULTIPLY = "*"
 class Expression:
     operator = OperatorType
-    operand1 = 0
-    operand2 = 0
+    operand1 = ''
+    operand2 = ''
+    result =''
     def __init__(self,operand1,operator,operand2):
         self.operand1 = operand1
         self.operator = operator
         self.operand2 = operand2
 
+def add(operand1,operand2):
+    result = []
+    addListRecursively(operand1, operand2, result, len(operand2))
+    return result
 
 def addNodesRecursively(node1, node2, result, counter, carryToAdd):
     if counter == 0:
@@ -47,31 +52,31 @@ def addListRecursively(list1, list2, result, lcounter):
     result.insert(0, resu)
     return resu.carry
 
-def processFile(file):
+def processFile(file,dpn):
     line = file.readline()
     if line.strip() == '':
         return
     if line.find("*") != -1:
         line = line.rstrip().split("*")
         Expression(line[0],line[1],OperatorType.MULTIPLY)
+
+
     elif line.find("+") != -1:
         line = line.rstrip().split("+")
         Expression(line[0], line[1], OperatorType.ADD)
-    print(line)
-    processFile(file)
+        alignedOperands = alignOperands([line[0],line[1]],dpn)
+        result = add(alignedOperands[0],alignedOperands[1])
+        k = str(result[0].carry)
+        for node in result:
+            for l in node.value:
+                k = k+str(l)
+        print(k.lstrip('0'))
+    processFile(file,dpn)
 
 
-def main():
-
-    dpn = 2
-
-    f = open('m', "r")
-    processFile(f)
-    f.close()
-
-
-    a = "999999999999999999999"
-    b = "1"
+def alignOperands(li,dpn):
+    a = li[0]
+    b = li[1]
     if len(a) > len(b):
         c = len(a)-len(b)
         b = c*'0'+b
@@ -82,25 +87,17 @@ def main():
         c = dpn - len(a)%dpn
         a = c*'0'+a
         b = c*'0'+b
-        print(c)
-    print(b)
     cc = len(a)%dpn
-    mylist = re.findall(dpn*'.',a[cc:])
-    mylist2 = re.findall(dpn*'.',b[cc:])
-    mylist = [Node(list(map(int,l))) for l in mylist]
-    mylist2 = [Node(list(map(int, l))) for l in mylist2]
-    [print(l.value,end=" ") for l in mylist]
-    print()
-    [print(l.value,end=" ") for l in mylist2]
-    result = []
-    print()
-    addListRecursively(mylist, mylist2, result, len(mylist2))
-    print("here we go")
-    a = str(result[0].carry)
-    for node in result:
-        for l in node.value:
-            a = a+ str(l)
-    print(a.lstrip('0'))
+    operand1List = re.findall(dpn*'.',a[cc:])
+    operand2List = re.findall(dpn*'.',b[cc:])
+    operand1List = [Node(list(map(int,l))) for l in operand1List]
+    operand2List = [Node(list(map(int, l))) for l in operand2List]
+    return [operand1List,operand2List]
 
+def main():
+    dpn = 2
+    f = open('m', "r")
+    processFile(f,dpn)
+    f.close()
 if __name__ == "__main__":
     main()
